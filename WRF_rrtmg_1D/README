@@ -1,0 +1,53 @@
+####################################
+# 2025-11-17 Final Correction
+# Written by YRSEOK
+# Contact: yrseok@ewha.ac.kr
+####################################
+## Overview
+This repository provides a WRF–RRTMG longwave (LW) 1D standalone simulation code.
+It is designed for calculating layer-by-layer contributions to TOA OLR,  
+(Planck function B(T) and optical depth Profile per layer)
+CASE: general, surface +1 K, atmosphere +1 K, surface&atmosphere +1 K
+
+## File Description
+- module_ra_rrtmg_lw.[F|f90]  
+  → Main wrapper (RRTMG_LWRAD, rrtmg_lwinit, ...)
+
+- module_ra_rrtmg_lwk.[F|f90]  
+  → Routines for k-distribution coefficients by spectral band
+
+- RRTMG_LW_DATA  
+  → k-distribution table binary (must be located in the execution directory).  
+    **Do not change the filename.**
+
+- wrf_stubs.f90  
+  → Stub code for standalone execution
+
+- lw_1d_driver.f90  
+  → Main driver for running the LW calculation
+
+## How to Run (Compile → Execute)
+
+### 1. Clean previous build
+rm -f *.o *.mod rrtmg_lw_1d.exe
+
+### 2. Compile
+gfortran -O2 -ffree-line-length-0 -I. -c module_ra_rrtmg_lw.f90
+gfortran -O2 -ffree-line-length-0 -I. -c module_ra_rrtmg_lwk.f90
+gfortran -O2 -ffree-line-length-0 -I. -c wrf_stubs.f90
+gfortran -O2 -ffree-line-length-0 -I. -c lw_1d_driver.f90
+
+gfortran -O2 -o rrtmg_lw_1d.exe \
+    module_ra_rrtmg_lwk.o module_ra_rrtmg_lw.o \
+    wrf_stubs.o lw_1d_driver.o
+
+### 3. Run
+./rrtmg_lw_1d.exe
+
+
+
+## OUTPUT FILE
+# "rwgt_" // date_str // ".csv" -> Weights
+# "olr_mclr_c1_" // date_str // ".csv"
+# "olr_tau_c1_" // date_str // ".csv" -> case1 tau g-point
+# CASE1-4 --> total #9 files
